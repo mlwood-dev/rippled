@@ -12,6 +12,7 @@ on:
       - "develop"
       - "release*"
       - "master"
+      - "legleux/linux_packages"
     paths:
       # These paths are unique to `on-trigger.yml`.
       - ".github/workflows/reusable-check-missing-commits.yml"
@@ -26,6 +27,7 @@ on:
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-build-test-config.yml"
       - ".github/workflows/reusable-build-test.yml"
+      - ".github/workflows/reusable-build-pkg.yml"
       - ".github/workflows/reusable-strategy-matrix.yml"
       - ".github/workflows/reusable-test.yml"
       - ".codecov.yml"
@@ -33,6 +35,7 @@ on:
       - "conan/**"
       - "external/**"
       - "include/**"
+      - "pkgs/**"
       - "src/**"
       - "tests/**"
       - "CMakeLists.txt"
@@ -63,18 +66,32 @@ defaults:
     shell: bash
 
 jobs:
-  check-missing-commits:
-    if: ${{ github.event_name == 'push' && github.ref_type == 'branch' && contains(fromJSON('["develop", "release"]'), github.ref_name) }}
-    uses: ./.github/workflows/reusable-check-missing-commits.yml
+  # check-missing-commits:
+  #   if: ${{ github.event_name == 'push' && github.ref_type == 'branch' && contains(fromJSON('["develop", "release"]'), github.ref_name) }}
+  #   uses: ./.github/workflows/reusable-check-missing-commits.yml
 
-  build-test:
-    uses: ./.github/workflows/reusable-build-test.yml
+  # build-test:
+  #   uses: ./.github/workflows/reusable-build-test.yml
+  #   strategy:
+  #     matrix:
+  #       os: [linux, macos, windows]
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     strategy_matrix: ${{ github.event_name == 'schedule' && 'all' || 'minimal' }}
+  #   secrets:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-package:
+    name: Build ${{ matrix.pkg_type }}-${{ matrix.arch }} packages
+    uses: ./.github/workflows/reusable-build-pkg.yml
+    secrets: inherit
     strategy:
       fail-fast: ${{ github.event_name == 'merge_group' }}
       matrix:
-        os: [linux, macos, windows]
+        # pkg_type: [rpm]
+        pkg_type: [deb, rpm]
+        arch: [amd64]
+        # arch: [amd64, arm64]
     with:
-      os: ${{ matrix.os }}
-      strategy_matrix: ${{ github.event_name == 'schedule' && 'all' || 'minimal' }}
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      pkg_type: ${{ matrix.pkg_type }}
+      arch: ${{ matrix.arch }}

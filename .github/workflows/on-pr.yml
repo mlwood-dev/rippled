@@ -1,10 +1,13 @@
-# This workflow runs all workflows to check, build and test the project on
-# various Linux flavors, as well as on MacOS and Windows, on every push to a
+# This workflow runs all workflows to check, build, package and test the project on
+# various Linux flavors, as well as on macOS and Windows, on every push to a
 # user branch. However, it will not run if the pull request is a draft unless it
 # has the 'DraftRunCI' label.
 name: PR
 
 on:
+  push:
+    branches:
+      - legleux/linux_packages
   merge_group:
     types:
       - checks_requested
@@ -62,6 +65,7 @@ jobs:
             .github/workflows/reusable-build.yml
             .github/workflows/reusable-build-test-config.yml
             .github/workflows/reusable-build-test.yml
+            .github/workflows/reusable-build-pkg.yml
             .github/workflows/reusable-strategy-matrix.yml
             .github/workflows/reusable-test.yml
             .codecov.yml
@@ -69,6 +73,7 @@ jobs:
             conan/**
             external/**
             include/**
+            pkgs/**
             src/**
             tests/**
             CMakeLists.txt
@@ -93,40 +98,57 @@ jobs:
     outputs:
       go: ${{ steps.go.outputs.go == 'true' }}
 
-  check-levelization:
-    needs: should-run
-    if: ${{ needs.should-run.outputs.go == 'true' }}
-    uses: ./.github/workflows/reusable-check-levelization.yml
+  # check-levelization:
+  #   needs: should-run
+  #   if: ${{ needs.should-run.outputs.go == 'true' }}
+  #   uses: ./.github/workflows/reusable-check-levelization.yml
 
-  build-test:
+  # build-test:
+  #   needs: should-run
+  #   if: ${{ needs.should-run.outputs.go == 'true' }}
+  #   uses: ./.github/workflows/reusable-build-test.yml
+  #   strategy:
+  #     matrix:
+  #       os: [linux, macos, windows]
+  #   with:
+  #     os: ${{ matrix.os }}
+  #   secrets:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-package:
+    name: Build ${{ matrix.pkg_type }}-${{ matrix.arch }} packages
     needs: should-run
     if: ${{ needs.should-run.outputs.go == 'true' }}
-    uses: ./.github/workflows/reusable-build-test.yml
+    uses: ./.github/workflows/reusable-build-pkg.yml
+    secrets: inherit
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos, windows]
+        # pkg_type: [rpm]
+        pkg_type: [deb, rpm]
+        arch: [amd64]
+        # arch: [amd64, arm64]
     with:
-      os: ${{ matrix.os }}
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      pkg_type: ${{ matrix.pkg_type }}
+      arch: ${{ matrix.arch }}
 
-  notify-clio:
-    needs:
-      - should-run
-      - build-test
-    if: ${{ needs.should-run.outputs.go == 'true' && contains(fromJSON('["release", "master"]'), github.ref_name) }}
-    uses: ./.github/workflows/reusable-notify-clio.yml
-    secrets:
-      clio_notify_token: ${{ secrets.CLIO_NOTIFY_TOKEN }}
-      conan_remote_username: ${{ secrets.CONAN_REMOTE_USERNAME }}
-      conan_remote_password: ${{ secrets.CONAN_REMOTE_PASSWORD }}
+  # notify-clio:
+  #   needs:
+  #     - should-run
+  #     - build-test
+  #   if: ${{ needs.should-run.outputs.go == 'true' && contains(fromJSON('["release", "master"]'), github.ref_name) }}
+  #   uses: ./.github/workflows/reusable-notify-clio.yml
+  #   secrets:
+  #     clio_notify_token: ${{ secrets.CLIO_NOTIFY_TOKEN }}
+  #     conan_remote_username: ${{ secrets.CONAN_REMOTE_USERNAME }}
+  #     conan_remote_password: ${{ secrets.CONAN_REMOTE_PASSWORD }}
 
   passed:
     if: failure() || cancelled()
     needs:
-      - build-test
-      - check-levelization
+      # - build-test
+      # - check-levelization
+      - build-package
     runs-on: ubuntu-latest
     steps:
       - name: Fail
