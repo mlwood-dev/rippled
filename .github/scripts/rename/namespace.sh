@@ -47,7 +47,4 @@ find "${DIRECTORY}" -type f -name "*.md" | while read -r FILE; do
     ${SED_COMMAND} -i 's/ripple::/xrpl::/g' "${FILE}"
 done
 
-# Reformat the files.
-pre-commit run
-
 echo "Renaming complete."
