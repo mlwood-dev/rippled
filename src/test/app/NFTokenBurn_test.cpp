@@ -7,7 +7,7 @@
 
 #include <random>
 
-namespace ripple {
+namespace xrpl {
 
 class NFTokenBurnBaseUtil_test : public beast::unit_test::suite
 {
@@ -1433,4 +1433,4 @@ BEAST_DEFINE_TESTSUITE_PRIO(NFTokenBurnWOFixTokenRemint, app, ripple, 3);
 BEAST_DEFINE_TESTSUITE_PRIO(NFTokenBurnWOFixNFTPageLinks, app, ripple, 3);
 BEAST_DEFINE_TESTSUITE_PRIO(NFTokenBurnAllFeatures, app, ripple, 3);
 
-}  // namespace ripple
+}  // namespace xrpl

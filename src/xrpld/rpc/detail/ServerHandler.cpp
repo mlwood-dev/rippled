@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace ripple {
+namespace xrpl {
 
 static bool
 isStatusRequest(http_request_type const& request)
@@ -1267,4 +1267,4 @@ make_ServerHandler(
         cm);
 }
 
-}  // namespace ripple
+}  // namespace xrpl

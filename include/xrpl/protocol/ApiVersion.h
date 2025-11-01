@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ripple {
+namespace xrpl {
 
 /**
  * API version numbers used in later API versions
@@ -91,6 +91,6 @@ forAllApiVersions(Fn const& fn, Args&&... args)
         RPC::apiMaximumValidVersion>(fn, std::forward<Args>(args)...);
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

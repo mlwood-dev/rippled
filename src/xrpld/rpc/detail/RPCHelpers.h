@@ -19,7 +19,7 @@ namespace Json {
 class Value;
 }
 
-namespace ripple {
+namespace xrpl {
 
 class ReadView;
 class Transaction;
@@ -195,7 +195,7 @@ setVersion(Object& parent, unsigned int apiVersion, bool betaEnabled)
 {
     XRPL_ASSERT(
         apiVersion != apiInvalidVersion,
-        "ripple::RPC::setVersion : input is valid");
+        "xrpl::RPC::setVersion : input is valid");
     auto&& object = addObject(parent, jss::version);
     if (apiVersion == apiVersionIfUnspecified)
     {
@@ -253,6 +253,6 @@ keypairForSignature(
 
 }  // namespace RPC
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

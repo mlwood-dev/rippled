@@ -6,7 +6,7 @@
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 class OfferBaseUtil_test : public beast::unit_test::suite
@@ -5365,4 +5365,4 @@ BEAST_DEFINE_TESTSUITE_PRIO(OfferAllFeatures, app, ripple, 2);
 BEAST_DEFINE_TESTSUITE_MANUAL_PRIO(Offer_manual, app, ripple, 20);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

@@ -4,7 +4,7 @@
 
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 
 class Version_test : public beast::unit_test::suite
 {
@@ -280,4 +280,4 @@ public:
 
 BEAST_DEFINE_TESTSUITE(Version, rpc, ripple);
 
-}  // namespace ripple
+}  // namespace xrpl

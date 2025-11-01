@@ -5,7 +5,7 @@
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 
 namespace test {
 
@@ -274,4 +274,4 @@ public:
 BEAST_DEFINE_TESTSUITE(NoRipple, rpc, ripple);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

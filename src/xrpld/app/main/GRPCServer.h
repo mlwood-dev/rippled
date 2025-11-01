@@ -15,7 +15,7 @@
 
 #include <grpcpp/grpcpp.h>
 
-namespace ripple {
+namespace xrpl {
 
 // Interface that CallData implements
 class Processor
@@ -306,5 +306,5 @@ private:
     std::thread thread_;
     bool running_ = false;
 };
-}  // namespace ripple
+}  // namespace xrpl
 #endif
