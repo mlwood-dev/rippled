@@ -772,8 +772,8 @@ private:
         // Attach signers to alice.
         env(signers(alice, 2, {{becky, 1}, {bogie, 1}, {ed, 2}}), sig(alie));
         env.close();
-        // if multiSignReserve disabled then its 2 + 1 per signer
-        int const signerListOwners{features[featureMultiSignReserve] ? 1 : 5};
+
+        int const signerListOwners = 1;
         env.require(owners(alice, signerListOwners));
 
         // Create
@@ -879,10 +879,7 @@ public:
         testDelete();
         testUpdate();
         testAmendment();
-        for (auto const& features :
-             {all,
-              all - featureMultiSignReserve - featureExpandedSignerList,
-              all - featureExpandedSignerList})
+        for (auto const& features : {all, all - featureExpandedSignerList})
             testMultisig(features);
     }
 };
