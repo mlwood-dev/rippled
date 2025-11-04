@@ -31,14 +31,11 @@ fi
 
 FILE="${DIRECTORY}/cmake/XrplCore.cmake"
 
-echo "BEFORE"
-cat "${FILE}"
-
+# Replace the comment and the command. Handle the situation where this or other
+# scripts are rerun.
 echo "Processing file: ${FILE}"
 ${SED_COMMAND} -i -E 's/For the time being.+/Create a symlink named "rippled" for backward compatibility./g' "${FILE}"
+${SED_COMMAND} -i -E 's/add_custom_command\(TARGET xrpld.+/add_custom_command(TARGET xrpld POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink "xrpld" "rippled")/g' "${FILE}"
 ${SED_COMMAND} -i -E 's/set_target_properties\(xrpld.+/add_custom_command(TARGET xrpld POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink "xrpld" "rippled")/g' "${FILE}"
-
-echo "AFTER"
-cat "${FILE}"
 
 echo "Processing complete."
