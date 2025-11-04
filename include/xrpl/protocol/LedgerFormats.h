@@ -43,7 +43,6 @@ enum LedgerEntryType : std::uint16_t
 
 #undef LEDGER_ENTRY
 #pragma pop_macro("LEDGER_ENTRY")
-
     //---------------------------------------------------------------------------
     /** A special type, matching any ledger entry type.
 

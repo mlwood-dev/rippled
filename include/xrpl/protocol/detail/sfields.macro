@@ -96,6 +96,10 @@ TYPED_SFIELD(sfFirstNFTokenSequence,     UINT32,    50)
 TYPED_SFIELD(sfOracleDocumentID,         UINT32,    51)
 TYPED_SFIELD(sfPermissionValue,          UINT32,    52)
 TYPED_SFIELD(sfMutableFlags,             UINT32,    53)
+TYPED_SFIELD(sfFrequency,                UINT64,    54)
+TYPED_SFIELD(sfStartTime,                UINT64,    54)
+TYPED_SFIELD(sfNextPaymentTime,          UINT64,    56)
+
 
 // 64-bit integers (common)
 TYPED_SFIELD(sfIndexNext,                UINT64,     1)
@@ -181,6 +185,7 @@ TYPED_SFIELD(sfDomainID,                 UINT256,   34)
 TYPED_SFIELD(sfVaultID,                  UINT256,   35,
     SField::sMD_PseudoAccount | SField::sMD_Default)
 TYPED_SFIELD(sfParentBatchID,            UINT256,   36)
+TYPED_SFIELD(sfSubscriptionID,           UINT256,   37)
 
 // number (common)
 TYPED_SFIELD(sfNumber,                   NUMBER,     1)
