@@ -1021,7 +1021,7 @@ public:
         Number const shareTotal{1148};
         Number assetTotal{1148, -1};
 
-        assets = assetTotal * (shares / shareTotal);
+        assets = (assetTotal * shares) / shareTotal;
         std::cerr << assets << '\n';              // 3.699999999999999/1/1
         BEAST_EXPECT(assets == Number(37l, -1));  // FAIL
     }
