@@ -30,8 +30,15 @@ if [ ! -d "${DIRECTORY}" ]; then
 fi
 
 FILE="${DIRECTORY}/cmake/XrplCore.cmake"
+
+echo "BEFORE"
+cat "${FILE}"
+
 echo "Processing file: ${FILE}"
 ${SED_COMMAND} -i -E 's/For the time being.+/Create a symlink named "rippled" for backward compatibility./g' "${FILE}"
 ${SED_COMMAND} -i -E 's/set_target_properties\(xrpld.+/add_custom_command(TARGET xrpld POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink "xrpld" "rippled")/g' "${FILE}"
+
+echo "AFTER"
+cat "${FILE}"
 
 echo "Processing complete."
