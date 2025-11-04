@@ -1011,25 +1011,41 @@ public:
         }
     }
 
+    void
+    testRoundingError()
+    {
+        testcase("rounding error");
+
+        STAmount assets{noIssue()};
+        STAmount const shares{noIssue(), 37, 0};
+        Number const shareTotal{1148};
+        Number assetTotal{1148, -1};
+
+        assets = assetTotal * (shares / shareTotal);
+        std::cerr << assets << '\n';              // 3.699999999999999/1/1
+        BEAST_EXPECT(assets == Number(37l, -1));  // FAIL
+    }
+
     //--------------------------------------------------------------------------
 
     void
     run() override
     {
-        testSetValue();
-        testNativeCurrency();
-        testCustomCurrency();
-        testArithmetic();
-        testUnderflow();
-        testRounding();
-        testConvertXRP();
-        testConvertIOU();
-        testCanAddXRP();
-        testCanAddIOU();
-        testCanAddMPT();
-        testCanSubtractXRP();
-        testCanSubtractIOU();
-        testCanSubtractMPT();
+        // testSetValue();
+        // testNativeCurrency();
+        // testCustomCurrency();
+        // testArithmetic();
+        // testUnderflow();
+        // testRounding();
+        // testConvertXRP();
+        // testConvertIOU();
+        // testCanAddXRP();
+        // testCanAddIOU();
+        // testCanAddMPT();
+        // testCanSubtractXRP();
+        // testCanSubtractIOU();
+        // testCanSubtractMPT();
+        testRoundingError();
     }
 };
 

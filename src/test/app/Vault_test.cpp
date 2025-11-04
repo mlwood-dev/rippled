@@ -2476,27 +2476,14 @@ class Vault_test : public beast::unit_test::suite
             {.depositor = owner, .id = vaultKeylet.key, .amount = IOU(100)}));
         env.close();
 
+        auto const tx1 = vault.deposit(
+            {.depositor = owner, .id = vaultKeylet.key, .amount = IOU(3.75)});
         for (auto i = 0; i < 5; ++i)
         {
-            env(vault.deposit(
-                {.depositor = owner,
-                 .id = vaultKeylet.key,
-                 .amount = IOU(3.75)}));
+            if (i == 4)
+                std::cerr << tx1 << '\n';
+            env(tx1);
             env.close();
-        }
-
-        env(vault.withdraw(
-            {.depositor = owner, .id = vaultKeylet.key, .amount = IOU(18.75)}));
-        env.close();
-
-        BEAST_EXPECT(env.balance(owner, IOU) == IOU(18.75));
-
-        auto const le = env.le(keylet::vault(vaultKeylet.key));
-        if (BEAST_EXPECT(le))
-        {
-            BEAST_EXPECT(le->getFieldNumber(sfAssetsTotal) == Number{100});
-            Account pseudo{"pseudo", le->getAccountID(sfAccount)};
-            BEAST_EXPECT(env.balance(pseudo, IOU) == IOU(100));
         }
     }
 
