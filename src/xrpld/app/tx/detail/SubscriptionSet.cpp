@@ -74,9 +74,6 @@ SubscriptionSet::preflight(PreflightContext const& ctx)
     if (ctx.tx.getFlags() & tfUniversalMask)
         return temINVALID_FLAG;
 
-    if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
-        return ret;
-
     if (ctx.tx.isFieldPresent(sfSubscriptionID))
     {
         // update
@@ -143,7 +140,7 @@ SubscriptionSet::preflight(PreflightContext const& ctx)
             return ret;
     }
 
-    return preflight2(ctx);
+    return tesSUCCESS;
 }
 
 TER
@@ -187,7 +184,7 @@ SubscriptionSet::preclaim(PreclaimContext const& ctx)
         if ((flags & lsfRequireDestTag) && !ctx.tx[~sfDestinationTag])
             return tecDST_TAG_NEEDED;
 
-        if (ctx.tx.getFieldU32(sfFrequency) <= 0)
+        if (ctx.tx.getFieldU64(sfFrequency) <= 0)
         {
             JLOG(ctx.j.trace())
                 << "SubscriptionSet: The frequency is less than or equal to 0.";
@@ -252,7 +249,7 @@ SubscriptionSet::doApply()
         auto const currentTime =
             sb.info().parentCloseTime.time_since_epoch().count();
         auto startTime = currentTime;
-        auto nextClaimTime = currentTime;
+        auto nextPaymentTime = currentTime;
 
         // create
         {
@@ -274,11 +271,11 @@ SubscriptionSet::doApply()
                 sfDestinationTag, ctx_.tx.getFieldU32(sfDestinationTag));
         sle->setFieldAmount(sfAmount, ctx_.tx.getFieldAmount(sfAmount));
         sle->setFieldAmount(sfBalance, ctx_.tx.getFieldAmount(sfAmount));
-        sle->setFieldU32(sfFrequency, ctx_.tx.getFieldU32(sfFrequency));
+        sle->setFieldU64(sfFrequency, ctx_.tx.getFieldU64(sfFrequency));
         if (ctx_.tx.isFieldPresent(sfStartTime))
         {
-            startTime = ctx_.tx.getFieldU32(sfStartTime);
-            nextClaimTime = startTime;
+            startTime = ctx_.tx.getFieldU64(sfStartTime);
+            nextPaymentTime = startTime;
             if (startTime < currentTime)
             {
                 JLOG(ctx_.journal.trace())
@@ -287,7 +284,7 @@ SubscriptionSet::doApply()
             }
         }
 
-        sle->setFieldU32(sfNextClaimTime, nextClaimTime);
+        sle->setFieldU64(sfNextPaymentTime, nextPaymentTime);
         if (ctx_.tx.isFieldPresent(sfExpiration))
         {
             auto const expiration = ctx_.tx.getFieldU32(sfExpiration);
@@ -299,7 +296,7 @@ SubscriptionSet::doApply()
                 return temBAD_EXPIRATION;
             }
 
-            if (expiration < nextClaimTime)
+            if (expiration < nextPaymentTime)
             {
                 JLOG(ctx_.journal.trace())
                     << "SubscriptionSet: The expiration time is "
