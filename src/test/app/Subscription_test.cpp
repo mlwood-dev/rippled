@@ -20,8 +20,7 @@
 #include <test/jtx.h>
 #include <test/jtx/subscription.h>
 
-#include <xrpld/ledger/Dir.h>
-
+#include <xrpl/ledger/Dir.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/TxFlags.h>
@@ -96,7 +95,7 @@ struct Subscription_test : public beast::unit_test::suite
     getNextPaymentTime(ReadView const& view, uint256 const& subId)
     {
         auto const [_, sleSub] = subKeyAndSle(view, subId);
-        return sleSub->getFieldU32(sfNextClaimTime);
+        return sleSub->getFieldU64(sfNextPaymentTime);
     }
 
     void
@@ -105,15 +104,15 @@ struct Subscription_test : public beast::unit_test::suite
         uint256 const& subId,
         STAmount const& amount,
         STAmount const& balance,
-        std::uint32_t const& frequency,
-        std::uint32_t const& nextClaimTime)
+        std::uint64_t const& frequency,
+        std::uint64_t const& nextPaymentTime)
     {
         auto const [id, sle] = subKeyAndSle(*env.current(), subId);
         BEAST_EXPECT(sle);
         BEAST_EXPECT(sle->getFieldAmount(sfAmount) == amount);
         BEAST_EXPECT(sle->getFieldAmount(sfBalance) == balance);
-        BEAST_EXPECT(sle->getFieldU32(sfFrequency) == frequency);
-        BEAST_EXPECT(sle->getFieldU32(sfNextClaimTime) == nextClaimTime);
+        BEAST_EXPECT(sle->getFieldU64(sfFrequency) == frequency);
+        BEAST_EXPECT(sle->getFieldU64(sfNextPaymentTime) == nextPaymentTime);
     }
 
     void
@@ -711,9 +710,9 @@ struct Subscription_test : public beast::unit_test::suite
 
             auto const [key, subSle] = subKeyAndSle(*env.current(), subId);
             BEAST_EXPECT(subSle->getFieldAmount(sfAmount) == XRP(10));
-            BEAST_EXPECT(subSle->getFieldU32(sfFrequency) == frequency.count());
+            BEAST_EXPECT(subSle->getFieldU64(sfFrequency) == frequency.count());
             BEAST_EXPECT(
-                subSle->getFieldU32(sfNextClaimTime) ==
+                subSle->getFieldU64(sfNextPaymentTime) ==
                 startTime.time_since_epoch().count());
             BEAST_EXPECT(!subSle->isFieldPresent(sfExpiration));
         }
@@ -733,9 +732,9 @@ struct Subscription_test : public beast::unit_test::suite
 
             auto const [key, subSle] = subKeyAndSle(*env.current(), subId);
             BEAST_EXPECT(subSle->getFieldAmount(sfAmount) == XRP(10));
-            BEAST_EXPECT(subSle->getFieldU32(sfFrequency) == frequency.count());
+            BEAST_EXPECT(subSle->getFieldU64(sfFrequency) == frequency.count());
             BEAST_EXPECT(
-                subSle->getFieldU32(sfNextClaimTime) ==
+                subSle->getFieldU64(sfNextPaymentTime) ==
                 startTime.time_since_epoch().count());
             BEAST_EXPECT(
                 subSle->getFieldU32(sfExpiration) ==
@@ -2824,7 +2823,7 @@ struct Subscription_test : public beast::unit_test::suite
             env.close();
 
             BEAST_EXPECT(env.balance(alice, MPT) == preAliceMPT + MPT(1000));
-            BEAST_EXPECT(env.balance(gw, MPT) == preOutstanding + MPT(1000));
+            BEAST_EXPECT(env.balance(gw, MPT) == preOutstanding - MPT(1000));
         }
 
         // Issuer as destination
@@ -2853,7 +2852,7 @@ struct Subscription_test : public beast::unit_test::suite
             env.close();
 
             BEAST_EXPECT(env.balance(alice, MPT) == preAliceMPT - MPT(1000));
-            BEAST_EXPECT(env.balance(gw, MPT) == preOutstanding - MPT(1000));
+            BEAST_EXPECT(env.balance(gw, MPT) == preOutstanding + MPT(1000));
         }
     }
 
