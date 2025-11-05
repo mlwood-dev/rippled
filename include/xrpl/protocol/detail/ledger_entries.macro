@@ -505,7 +505,7 @@ LEDGER_ENTRY(ltSUBSCRIPTION, 0x0085, Subscription, subscription, ({
     {sfAmount,               soeREQUIRED},
     {sfBalance,              soeREQUIRED},
     {sfFrequency,            soeREQUIRED},
-    {sfNextClaimTime,        soeREQUIRED},
+    {sfNextPaymentTime,      soeREQUIRED},
     {sfExpiration,           soeOPTIONAL},
     {sfDestinationNode,      soeREQUIRED},
 }))
