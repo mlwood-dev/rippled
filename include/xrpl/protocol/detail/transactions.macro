@@ -926,7 +926,7 @@ TRANSACTION(ttBATCH, 71, Batch,
 }))
 
 /** This transaction type batches together transactions. */
-TRANSACTION(ttSUBSCRIPTION_SET, 72, SubscriptionSet, Delegation::delegatable, ({
+TRANSACTION(ttSUBSCRIPTION_SET, 72, SubscriptionSet, Delegation::delegatable, featureSubscription, mayAuthorizeMPT, ({
     {sfDestination, soeOPTIONAL},
     {sfAmount, soeREQUIRED, soeMPTSupported},
     {sfFrequency, soeOPTIONAL},
@@ -937,12 +937,12 @@ TRANSACTION(ttSUBSCRIPTION_SET, 72, SubscriptionSet, Delegation::delegatable, ({
 }))
 
 /** This transaction type batches together transactions. */
-TRANSACTION(ttSUBSCRIPTION_CANCEL, 73, SubscriptionCancel, Delegation::delegatable, ({
+TRANSACTION(ttSUBSCRIPTION_CANCEL, 73, SubscriptionCancel, Delegation::delegatable, featureSubscription, mayAuthorizeMPT, ({
     {sfSubscriptionID, soeREQUIRED},
 }))
 
 /** This transaction type batches together transactions. */
-TRANSACTION(ttSUBSCRIPTION_CLAIM, 74, SubscriptionClaim, Delegation::delegatable, ({
+TRANSACTION(ttSUBSCRIPTION_CLAIM, 74, SubscriptionClaim, Delegation::delegatable, featureSubscription, mayAuthorizeMPT, ({
     {sfAmount, soeREQUIRED, soeMPTSupported},
     {sfSubscriptionID, soeREQUIRED},
 }))
