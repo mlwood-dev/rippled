@@ -20,13 +20,10 @@ SubscriptionClaim::preflight(PreflightContext const& ctx)
     if (!ctx.rules.enabled(featureSubscription))
         return temDISABLED;
 
-    if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
-        return ret;
-
     if (ctx.tx.getFlags() & tfUniversalMask)
         return temINVALID_FLAG;
 
-    return preflight2(ctx);
+    return tesSUCCESS;
 }
 
 TER
@@ -87,22 +84,22 @@ SubscriptionClaim::preclaim(PreclaimContext const& ctx)
         // Time/period context
         std::uint32_t const currentTime =
             ctx.view.info().parentCloseTime.time_since_epoch().count();
-        std::uint32_t const nextClaimTime =
-            sleSub->getFieldU32(sfNextClaimTime);
-        std::uint32_t const frequency = sleSub->getFieldU32(sfFrequency);
+        std::uint64_t const nextPaymentTime =
+            sleSub->getFieldU64(sfNextPaymentTime);
+        std::uint64_t const frequency = sleSub->getFieldU64(sfFrequency);
 
         // Determine effective available balance:
         // - If we have crossed into a later period AND the previous period had
         // a partial
         //   balance remaining (carryover not allowed), then the effective
         //   period rolls forward once and its balance resets to sleAmount.
-        // - Otherwise we operate on the period at nextClaimTime with its stored
+        // - Otherwise we operate on the period at nextPaymentTime with its stored
         // balance.
         STAmount balance = sleSub->getFieldAmount(sfBalance);
-        bool const arrears = currentTime >= nextClaimTime + frequency;
+        bool const arrears = currentTime >= nextPaymentTime + frequency;
         if (arrears && balance != sleAmount)
         {
-            // We will effectively operate on (nextClaimTime + frequency) with a
+            // We will effectively operate on (nextPaymentTime + frequency) with a
             // full balance.
             balance = sleAmount;
         }
@@ -134,7 +131,7 @@ SubscriptionClaim::preclaim(PreclaimContext const& ctx)
     }
 
     // Must be at or past the start of the effective period.
-    if (!hasExpired(ctx.view, sleSub->getFieldU32(sfNextClaimTime)))
+    if (!hasExpired(ctx.view, sleSub->getFieldU64(sfNextPaymentTime)))
     {
         JLOG(ctx.j.trace()) << "SubscriptionClaim: The subscription has not "
                                "reached the next claim time.";
@@ -331,25 +328,25 @@ SubscriptionClaim::doApply()
     STAmount const deliverAmount = ctx_.tx.getFieldAmount(sfAmount);
 
     // Pull current period info
-    std::uint32_t const currentTime =
+    std::uint64_t const currentTime =
         psb.info().parentCloseTime.time_since_epoch().count();
-    std::uint32_t nextClaimTime = sleSub->getFieldU32(sfNextClaimTime);
-    std::uint32_t const frequency = sleSub->getFieldU32(sfFrequency);
+    std::uint64_t nextPaymentTime = sleSub->getFieldU64(sfNextPaymentTime);
+    std::uint64_t const frequency = sleSub->getFieldU64(sfFrequency);
 
     STAmount availableBalance = sleSub->getFieldAmount(sfBalance);
-    bool const arrears = currentTime >= nextClaimTime + frequency;
+    bool const arrears = currentTime >= nextPaymentTime + frequency;
 
     // If we crossed into a later period and the previous period was partially
     // used, forfeit the leftover and roll forward exactly one period; reset the
     // balance.
     if (arrears && availableBalance != sleAmount)
     {
-        nextClaimTime += frequency;
+        nextPaymentTime += frequency;
         availableBalance = sleAmount;
 
         // Reflect the rollover immediately in the SLE so subsequent logic is
         // consistent.
-        sleSub->setFieldU32(sfNextClaimTime, nextClaimTime);
+        sleSub->setFieldU64(sfNextPaymentTime, nextPaymentTime);
         sleSub->setFieldAmount(sfBalance, availableBalance);
     }
 
@@ -398,16 +395,16 @@ SubscriptionClaim::doApply()
     {
         // Full period claimed: advance exactly one period and reset next period
         // balance.
-        nextClaimTime += frequency;
-        sleSub->setFieldU32(sfNextClaimTime, nextClaimTime);
+        nextPaymentTime += frequency;
+        sleSub->setFieldU64(sfNextPaymentTime, nextPaymentTime);
         sleSub->setFieldAmount(sfBalance, sleAmount);
     }
     else
     {
         // Partial claim within the same effective period.
         sleSub->setFieldAmount(sfBalance, newBalance);
-        // Do not advance nextClaimTime; if we had a rollover-forfeit above,
-        // we already moved nextClaimTime forward exactly once.
+        // Do not advance nextPaymentTime; if we had a rollover-forfeit above,
+        // we already moved nextPaymentTime forward exactly once.
     }
 
     psb.update(sleSub);
